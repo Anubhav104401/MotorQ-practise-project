@@ -1,6 +1,9 @@
 package com.fleetbootcamp.telemetry.web;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +21,14 @@ public class HealthController {
         this.kafkaBootstrap = kafkaBootstrap;
     }
 
-    @GetMapping("/")
+    /** Serves the interactive Fleet Telemetry Dashboard to web browsers. */
+    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+    public Resource dashboard() {
+        return new ClassPathResource("static/index.html");
+    }
+
+    /** Serves status metadata for JSON clients and automated health monitors. */
+    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> root() {
         return ResponseEntity.ok(Map.of(
                 "service", "Fleet Telemetry Platform",

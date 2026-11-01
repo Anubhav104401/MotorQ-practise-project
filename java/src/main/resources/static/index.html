@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Telemetry Platform — Connected Vehicle Command Center</title>
+    <meta name="description" content="Real-time connected vehicle telemetry and event ingestion platform with Apache Kafka and PostgreSQL.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo-group">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.1 2 11.5 2 12v4c0 .6.4 1 1 1h2"/>
+                        <circle cx="7" cy="17" r="2"/>
+                        <path d="M9 17h6"/>
+                        <circle cx="17" cy="17" r="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="logo-title">Fleet Telemetry <span class="badge-tag">Command Center</span></h1>
+                    <p class="logo-subtitle">Connected Vehicle Ingestion & Stream Processing</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="stat-pill">
+                <span class="stat-label">TOTAL PINGS</span>
+                <span class="stat-value" id="stat-total-pings">0</span>
+            </div>
+            <div class="stat-pill success-pill">
+                <span class="stat-label">INGESTED (202)</span>
+                <span class="stat-value" id="stat-accepted">0</span>
+            </div>
+            <div class="stat-pill error-pill">
+                <span class="stat-label">REJECTED (400)</span>
+                <span class="stat-value" id="stat-rejected">0</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-label">LATENCY</span>
+                <span class="stat-value" id="stat-latency">-- ms</span>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="status-indicator" id="system-status-indicator">
+                <span class="status-dot pulsing"></span>
+                <span class="status-text" id="system-status-text">SYSTEM ONLINE</span>
+            </div>
+            <a href="/health" target="_blank" class="nav-btn" title="View System Health JSON">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                /health
+            </a>
+            <a href="https://github.com/Anubhav104401/MotorQ-practise-project" target="_blank" class="nav-btn github-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container Grid -->
+    <main class="dashboard-grid">
+        
+        <!-- Left Panel: Fleet Simulation & Vehicles -->
+        <section class="card fleet-card">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <div class="card-icon cyan-glow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>Connected Vehicles</h2>
+                        <p class="section-desc">Active telematics transmitters</p>
+                    </div>
+                </div>
+                <div class="fleet-controls">
+                    <button id="btn-toggle-sim" class="btn-primary">
+                        <span class="btn-icon">▶</span>
+                        <span id="sim-btn-text">Start Auto Sim</span>
+                    </button>
+                    <button id="btn-send-burst" class="btn-secondary" title="Send 1 ping from every vehicle">
+                        Burst (All)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vehicle List Container -->
+            <div class="vehicle-list" id="vehicle-list-container">
+                <!-- Vehicle cards dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Center Panel: Active Vehicle Telematics Inspector & Map Radar -->
+        <section class="card telematics-card">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <div class="card-icon emerald-glow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>Vehicle Telematics Radar</h2>
+                        <p class="section-desc">Real-time metrics for <span id="active-vin-title" class="highlight-mono">--</span></p>
+                    </div>
+                </div>
+                <div class="oem-badge" id="active-oem-badge">OEM-A</div>
+            </div>
+
+            <!-- Gauges & Telemetry Readouts -->
+            <div class="telemetry-display-grid">
+                <!-- Speedometer Gauge -->
+                <div class="gauge-box">
+                    <div class="gauge-label">SPEED (KM/H)</div>
+                    <div class="gauge-value" id="gauge-speed">0.0</div>
+                    <div class="speed-bar-container">
+                        <div class="speed-bar-fill" id="speed-bar-fill"></div>
+                    </div>
+                    <div class="gauge-sub" id="speed-limit-status">Normal Range</div>
+                </div>
+
+                <!-- Odometer -->
+                <div class="gauge-box">
+                    <div class="gauge-label">ODOMETER</div>
+                    <div class="odometer-counter" id="gauge-odometer">00000.0</div>
+                    <div class="gauge-sub"><span id="gauge-unit">km</span> (metric normalised)</div>
+                </div>
+
+                <!-- State of Charge (Battery / Fuel) -->
+                <div class="gauge-box">
+                    <div class="gauge-label">BATTERY / SOC</div>
+                    <div class="gauge-value" id="gauge-soc">-- %</div>
+                    <div class="soc-bar-container">
+                        <div class="soc-bar-fill" id="soc-bar-fill"></div>
+                    </div>
+                    <div class="gauge-sub" id="soc-status">Non-EV Hybrid</div>
+                </div>
+
+                <!-- Ignition & Heading -->
+                <div class="gauge-box compass-box">
+                    <div class="gauge-label">HEADING & IGNITION</div>
+                    <div class="compass-wrapper">
+                        <div class="compass-dial" id="compass-needle">▲</div>
+                        <span class="heading-degrees" id="gauge-heading">0°</span>
+                    </div>
+                    <div class="gauge-sub">
+                        <span class="ignition-tag on" id="gauge-ignition">IGNITION ON</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPS Coordinates Radar -->
+            <div class="radar-box">
+                <div class="radar-header">
+                    <span>GPS FIX & TRAJECTORY</span>
+                    <span class="mono-coords" id="gauge-coords">LAT: 12.971600 | LON: 77.594600</span>
+                </div>
+                <div class="radar-visual" id="radar-screen">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-rings"></div>
+                    <div class="radar-crosshair"></div>
+                    <!-- Dots for all vehicles on radar -->
+                    <div id="radar-blips"></div>
+                </div>
+            </div>
+
+            <!-- Architecture Flow Pipeline Banner -->
+            <div class="pipeline-banner">
+                <div class="pipeline-node active">🚗 Device Ping</div>
+                <div class="pipeline-arrow">➔</div>
+                <div class="pipeline-node active">⚡ Ingest API</div>
+                <div class="pipeline-arrow">➔</div>
+                <div class="pipeline-node active">📨 Kafka: telemetry.raw</div>
+                <div class="pipeline-arrow">➔</div>
+                <div class="pipeline-node active">🐘 PostgreSQL</div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Interactive Ingestion Console & Live Stream -->
+        <section class="card console-card">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <div class="card-icon amber-glow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="4 17 10 11 4 5"/>
+                            <line x1="12" y1="19" x2="20" y2="19"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>API Test Console</h2>
+                        <p class="section-desc">Test validation & Kafka ingestion</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="preset-buttons">
+                <span class="preset-label">TEST SCENARIOS:</span>
+                <button class="preset-btn" id="preset-valid">Standard (202)</button>
+                <button class="preset-btn" id="preset-miles">OEM-B Miles</button>
+                <button class="preset-btn" id="preset-bad-vin">Bad VIN (400)</button>
+                <button class="preset-btn" id="preset-future">Future TS (400)</button>
+                <button class="preset-btn" id="preset-speed">Overspeed (120 km/h)</button>
+            </div>
+
+            <!-- Ingestion Form -->
+            <form id="ingest-form" class="ingest-form">
+                <div class="form-row">
+                    <div class="form-group flex-2">
+                        <label for="input-vin">VIN (17 chars, no I/O/Q)</label>
+                        <input type="text" id="input-vin" name="vin" value="1FA6CVNCNCXW927TC" required maxlength="17" spellcheck="false">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="input-oem">Source OEM</label>
+                        <select id="input-oem" name="source_oem">
+                            <option value="OEM-A">OEM-A (km)</option>
+                            <option value="OEM-B">OEM-B (miles)</option>
+                            <option value="OEM-C">OEM-C (km)</option>
+                            <option value="OEM-D">OEM-D (EV)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-speed">Speed (0–300)</label>
+                        <input type="number" id="input-speed" name="speed_kmph" value="65.4" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-odometer">Odometer</label>
+                        <input type="number" id="input-odometer" name="odometer" value="14250.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-unit">Unit</label>
+                        <select id="input-unit" name="odometer_unit">
+                            <option value="km">km</option>
+                            <option value="mi">mi</option>
+                            <option value="furlong">furlong (invalid)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="input-lat">Latitude (-90..90)</label>
+                        <input type="number" id="input-lat" name="lat" value="12.9716" step="0.0001">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-lon">Longitude (-180..180)</label>
+                        <input type="number" id="input-lon" name="lon" value="77.5946" step="0.0001">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-soc">SOC % (0..100)</label>
+                        <input type="number" id="input-soc" name="soc_pct" placeholder="null" step="0.1">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="btn-submit-ping" class="btn-submit">
+                        <span class="btn-spinner" id="submit-spinner" style="display: none;"></span>
+                        POST /v1/heartbeats
+                    </button>
+                    <button type="button" id="btn-dup-ping" class="btn-duplicate" title="Send identical ping twice to verify idempotency">
+                        Send Twice (Duplicate)
+                    </button>
+                </div>
+            </form>
+
+            <!-- Live Event Stream Log -->
+            <div class="feed-container">
+                <div class="feed-header">
+                    <span>LIVE EVENT LOG & RESPONSES</span>
+                    <button id="btn-clear-feed" class="text-btn">Clear Log</button>
+                </div>
+                <div class="event-feed-list" id="event-feed-list">
+                    <div class="feed-empty-state">No telemetry ingested yet. Click "Start Auto Sim" or send a ping above!</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-left">
+            <span>Fleet Telemetry Platform &bull; Java 17 Spring Boot 3 &bull; Apache Kafka &bull; PostgreSQL 15</span>
+        </div>
+        <div class="footer-right">
+            <span>MotorQ Practice Project &bull; Milestones M1, M2 & M4 Deployed</span>
+        </div>
+    </footer>
+
+    <!-- Script -->
+    <script src="/app.js"></script>
+</body>
+</html>
