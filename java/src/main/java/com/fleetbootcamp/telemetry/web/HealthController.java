@@ -18,6 +18,19 @@ public class HealthController {
         this.kafkaBootstrap = kafkaBootstrap;
     }
 
+    @GetMapping("/")
+    public ResponseEntity<Map<String, Object>> root() {
+        return ResponseEntity.ok(Map.of(
+                "service", "Fleet Telemetry Platform",
+                "status", "RUNNING",
+                "health", "/health",
+                "endpoints", Map.of(
+                        "health", "GET /health",
+                        "heartbeats", "POST /v1/heartbeats"
+                )
+        ));
+    }
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
         boolean db;

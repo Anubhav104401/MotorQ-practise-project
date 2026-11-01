@@ -39,4 +39,12 @@ class HealthControllerTest {
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.db").value("down"));
     }
+
+    @Test
+    void rootReturnsServiceInfo() throws Exception {
+        mvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.service").value("Fleet Telemetry Platform"))
+                .andExpect(jsonPath("$.status").value("RUNNING"));
+    }
 }
