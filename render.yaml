@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: fleet-telemetry
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_HOST
+        fromDatabase:
+          name: fleet-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: fleet-postgres
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: fleet-postgres
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: fleet-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: fleet-postgres
+          property: password
+      - key: KAFKA_BOOTSTRAP
+        sync: false
+      - key: CONSUMER_ENABLED
+        value: "true"
+
+databases:
+  - name: fleet-postgres
+    databaseName: fleet
+    user: fleet
+    plan: free
+    region: oregon

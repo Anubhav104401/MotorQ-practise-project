@@ -5,7 +5,7 @@ spring:
   application:
     name: fleet-telemetry
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fleet}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:fleet}
     username: ${DB_USER:fleet}
     password: ${DB_PASSWORD:fleet}
     hikari:

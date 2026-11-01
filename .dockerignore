@@ -1,0 +1,9 @@
+.git
+31102004/
+**/target/
+**/.idea/
+**/.vscode/
+**/*.iml
+**/__pycache__/
+**/.venv/
+**/venv/
