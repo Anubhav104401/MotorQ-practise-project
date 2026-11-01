@@ -15,3 +15,6 @@ venv/
 .DS_Store
 # Local env
 .env
+
+# Personal / excluded
+31102004/

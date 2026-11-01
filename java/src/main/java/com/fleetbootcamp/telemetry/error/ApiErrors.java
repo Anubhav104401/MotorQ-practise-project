@@ -51,8 +51,11 @@ public class ApiErrors {
     public ResponseEntity<Map<String, Object>> unreadable(HttpMessageNotReadableException ex) {
         String field = "body";
         if (ex.getCause() instanceof MismatchedInputException mie && !mie.getPath().isEmpty()) {
-            field = mie.getPath().stream().map(JsonMappingException.Reference::getFieldName)
+            String resolved = mie.getPath().stream().map(JsonMappingException.Reference::getFieldName)
                     .filter(f -> f != null).collect(Collectors.joining("."));
+            if (!resolved.isBlank()) {
+                field = resolved;
+            }
         }
         return badRequest(List.of(Map.of("field", field, "message", "invalid value or format")));
     }
