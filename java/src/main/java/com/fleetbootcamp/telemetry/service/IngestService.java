@@ -23,6 +23,7 @@ public class IngestService {
     private final ObjectMapper objectMapper;
     private final Clock clock;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public IngestService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this(kafkaTemplate, objectMapper, Clock.systemUTC());
     }
